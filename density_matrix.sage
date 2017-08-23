@@ -1,6 +1,7 @@
 load('intertwiner.sage')
 load('utilities.sage')
 import logging
+import sympy
 
 logging.basicConfig(level=logging.INFO)
 
@@ -50,3 +51,20 @@ def density_matrix(k=2):
         M2 = partial_trace(pre_partial_trace(V2, V1, 1/3, k), 3)
 
     return [M1, M2]
+
+def eigenspaces(mat):
+    """
+    Computes the eigenvales and vectors of the provided matrix.
+    
+    For each distinct eigenvalue returns a list of the form (e, V, n),
+    where e is the eigenvalue, V is an array of vectors, and n is the 
+    algebraic multiplicity.
+    """
+
+    symat = sympy.Matrix(map( lambda r: list(r), mat.rows()))
+
+    # use symat.eigenvecs
+
+    return 0
+
+
