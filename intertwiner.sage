@@ -31,12 +31,7 @@ def intertwiner(j, j1, j2):
         # then we know that the Clebsch Gordan coefficients will be zero
         # and can skip actually calculating them.
         if abs(j1 - j2) > j or j > j1 + j2:
-            V.append(
-                    #TODO: Find a nicer way to have a list of the right length.
-                    map(lambda j_tmp:
-                        0, spin_range(j)
-                        )
-                    )
+            V.append([0]*Integer(2*j+1))
         else:
             V.append(
                 map(lambda j_tmp:
