@@ -102,7 +102,7 @@ def safe_simplify(a):
     try:
         a_tmp = a.canonicalize_radical()
     except AttributeError:
-        pass
+        return a
 
     return a_tmp.simplify_full()
 
