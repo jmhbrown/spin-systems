@@ -1,24 +1,25 @@
 from sage.symbolic.expression_conversions import algebraic
 
 import logging
+from sympy import SparseMatrix as sympySM
 logging.basicConfig(level=logging.INFO)
 
 
-def partial_trace(M, n=2):
+def partial_trace(mat, n=2):
     """
-    Takes the partial trace of `M` over CC^n
+    Takes the partial trace of `mat` over CC^n
     e.g. replaces each `n` by `n` block with its trace
     """
 
-    if n.divides(M.ncols()) and n.divides(M.nrows()):
+    if n.divides(mat.ncols()) and n.divides(mat.nrows()):
         logging.info("Taking partial trace over CC^%d" % n)
         p_trace = []
-        M.subdivide(range(n, M.nrows()-n+1,n), range(n, M.ncols()-n+1,n))
+        mat.subdivide(range(n, mat.nrows()-n+1,n), range(n, mat.ncols()-n+1,n))
 
-        for i in range(0, M.nrows()-n+1,n):
+        for i in range(0, mat.nrows()-n+1,n):
             row = []
-            for j in range(0,M.ncols()-n+1,n):
-                row.append(M.subdivision(i/n,j/n).trace())
+            for j in range(0,mat.ncols()-n+1,n):
+                row.append(mat.subdivision(i/n,j/n).trace())
                 logging.debug("Tracing over the subdivision starting at (%d, %d)." % ( i, j) )
             p_trace.append(row)
 
@@ -27,26 +28,42 @@ def partial_trace(M, n=2):
         logging.info("Post-trace rank: %d" % mat.rank())
         return mat
     else:
-        raise Exception("Can't take partial trace over CC^%d of %d by %d matrix!" % (n, M.nrows(), M.ncols()))
+        raise Exception("Can't take partial trace over CC^%d of %d by %d matrix!" % (n, mat.nrows(), mat.ncols()))
 
-def tensor_exponential(M, n):
+
+def convert_to_sympy(mat):
     """
-    Computes M tensored with itself n times.
+    Converts a sage matrix into a sympy sparse matrix.
 
     INPUT::
 
-        - `M` --    Matrix.
+        - `mat` --  Matrix.
+
+    OUTPUT::
+
+        A sympy SparseMatrix with the same entries as mat.
+    """
+
+    return sympySM(map( lambda r: list(r), mat.rows()))
+
+def tensor_exponential(mat, n):
+    """
+    Computes mat tensored with itself n times.
+
+    INPUT::
+
+        - `mat` --    Matrix.
         - `n` --    Integer. Tensor exponent.
 
     OUTPUT::
 
-        A new matrix, M \otimes M \otimes \ldots \otimes M.
+        A new matrix, mat \otimes mat \otimes \ldots \otimes mat.
 
     """
-    tmp = M
+    tmp = mat
 
     for i in range(1,n):
-        tmp = tmp.tensor_product(M)
+        tmp = tmp.tensor_product(mat)
 
     return tmp
 
@@ -158,14 +175,14 @@ def to_field_element(number, field=QQ):
         logging.info("%s is already a(n) %s" %(number, number.__class__))
         return number
 
-def base_field(M):
+def base_field(mat):
     """
     Builds an extension field over QQ which contains every entry in the provided matrix.
     """
 
     polys = []
     # First build an array of non-linear minimal polynomials
-    for row in M:
+    for row in mat:
         for elem in row:
             p = elem.minpoly()
             # if the minimal polynomial in linear, then this element is rational.
