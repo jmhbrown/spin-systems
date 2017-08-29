@@ -85,10 +85,10 @@ def eigenspaces(mat):
     algebraic multiplicity.
     """
 
-    symat = sympy.Matrix(map( lambda r: list(r), mat.rows()))
+    symat = convert_to_sympy(mat)
 
     # use symat.eigenvecs
 
-    return 0
+    return symat.eigenvects()
 
 
