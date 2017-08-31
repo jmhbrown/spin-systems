@@ -46,6 +46,22 @@ def convert_to_sympy(mat):
 
     return sympySM(map( lambda r: list(r), mat.rows()))
 
+def eigenspaces(mat):
+    """
+    Computes the eigenvales and vectors of the provided matrix.
+
+    For each distinct eigenvalue returns a list of the form (e, V, n),
+    where e is the eigenvalue, V is an array of vectors, and n is the
+    algebraic multiplicity.
+    """
+
+    symat = convert_to_sympy(mat)
+
+    # use symat.eigenvecs
+
+    return symat.eigenvects()
+
+
 def tensor_exponential(mat, n):
     """
     Computes mat tensored with itself n times.

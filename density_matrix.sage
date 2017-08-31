@@ -75,20 +75,3 @@ def density_matrix(k, t='A'):
         M2 = partial_trace(pre_partial_trace(V2, V1, 1/dim1, k), dim1)
 
     return [M1, M2]
-
-def eigenspaces(mat):
-    """
-    Computes the eigenvales and vectors of the provided matrix.
-
-    For each distinct eigenvalue returns a list of the form (e, V, n),
-    where e is the eigenvalue, V is an array of vectors, and n is the
-    algebraic multiplicity.
-    """
-
-    symat = convert_to_sympy(mat)
-
-    # use symat.eigenvecs
-
-    return symat.eigenvects()
-
-
