@@ -4,6 +4,22 @@ import logging
 from sympy import SparseMatrix as sympySM
 logging.basicConfig(level=logging.INFO)
 
+def parse_kwargs(kwargs, option, default):
+    """
+    Parses keyword arguments. Used by other methods.
+
+    INPUT::
+
+        - `kwargs` --   A dictionary of the form {'option1': 'value1', 'option2': 'value2'}
+        - `option` --   The relevant option's keyword.
+        - `default` --  The default value. Used if `option` is not a key in `kwargs`
+
+    OUPUT::
+
+        Returns `kwargs`[`option`] if it exists, otherwise returns default value.
+    """
+
+    return kwargs[option] if kwargs.has_key(option) else default
 
 def partial_trace(mat, n=2):
     """
@@ -53,6 +69,17 @@ def eigenspaces(mat):
     For each distinct eigenvalue returns a list of the form (e, V, n),
     where e is the eigenvalue, V is an array of vectors, and n is the
     algebraic multiplicity.
+
+
+    INPUT::
+
+    - `mat` --  Sympy Matrix. Required.
+
+    OUTPUT::
+
+    Returns a list with entries of the form (e, n, V), where `e` is the eigenvalue,
+    `n` the algebraic multiplicity, and `V` is a list of corresponding eigenvectors.
+
     """
 
     symat = convert_to_sympy(mat)
