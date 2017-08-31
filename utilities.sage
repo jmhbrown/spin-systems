@@ -2,7 +2,7 @@ from sage.symbolic.expression_conversions import algebraic
 
 import logging
 from sympy import SparseMatrix as sympySM
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 def parse_kwargs(kwargs, option, default):
     """
@@ -60,9 +60,14 @@ def convert_to_sympy(mat):
         A sympy SparseMatrix with the same entries as mat.
     """
 
-    return sympySM(map( lambda r: list(r), mat.rows()))
+    if isinstance(mat, sympy.Matrices.MatrixBase):
+        logging.debug("Provided matrix already in sympy.")
+        return mat
+    else:
+        logging.debug("Converting matrix to sympy.SparseMatrix")
+        return sympySM(map( lambda r: list(r), mat.rows()))
 
-def eigenspaces(mat):
+def eigenspaces(mat, **kwargs):
     """
     Computes the eigenvales and vectors of the provided matrix.
 
@@ -73,20 +78,27 @@ def eigenspaces(mat):
 
     INPUT::
 
-    - `mat` --  Sympy Matrix. Required.
+    - `mat` --  Sage or Sympy Matrix. Required.
+    - `include_zero` -- Boolean. Optional, default: False. Eigenvectors
+                        corresponding to the nullspace will only be included
+                        in the output if this is set to True.
 
     OUTPUT::
 
-    Returns a list with entries of the form (e, n, V), where `e` is the eigenvalue,
-    `n` the algebraic multiplicity, and `V` is a list of corresponding eigenvectors.
+        Returns a list with entries of the form (e, n, V), where `e` is the eigenvalue,
+        `n` the algebraic multiplicity, and `V` is a list of corresponding eigenvectors.
 
     """
 
+    include_zero = parse_kwargs(kwargs, 'include_zero', False)
     symat = convert_to_sympy(mat)
 
-    # use symat.eigenvecs
+    logging.info("Computing eigenvectors & values.")
 
-    return symat.eigenvects()
+    if include_zero:
+        return symat.eigenvects()
+    else:
+        return filter(lambda x: x[0] != 0, symat.eigenvects())
 
 
 def tensor_exponential(mat, n):

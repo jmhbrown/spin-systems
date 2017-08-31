@@ -1,9 +1,8 @@
 load('intertwiner.sage')
 load('utilities.sage')
 import logging
-import sympy
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 def pre_partial_trace(V1, V2, normalization_constant, k=2):
     """

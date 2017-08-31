@@ -1,12 +1,14 @@
 load('intertwiner.sage')
 load('utilities.sage')
 import logging
-import sympy
+logging.basicConfig(level=logging.DEBUG)
+
+from sympy import SparseMatrix as sympySM
 
 
 def projection(vectors):
     """
-    Creates the orthogonal projection onto the space spanned by vectors.
+    Creates the orthogonal projection onto the space spanned by `vectors`.
 
     INPUT::
 
@@ -19,11 +21,8 @@ def projection(vectors):
     """
 
 
-    vec_matrix = sympy.SparseMatrix(map(
-        lambda col:
-            list(col),
-
-        vectors
+    vec_matrix = sympySM(map(
+        lambda vec: list(vec), vectors
     )).T
 
     logging.info("Constructing projection from %d by %d matrix of vectors" % vec_matrix.shape)
