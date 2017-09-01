@@ -60,12 +60,58 @@ def convert_to_sympy(mat):
         A sympy SparseMatrix with the same entries as mat.
     """
 
-    if isinstance(mat, sympy.Matrices.MatrixBase):
+    if isinstance(mat, sympy.MatrixBase):
         logging.debug("Provided matrix already in sympy.")
         return mat
     else:
         logging.debug("Converting matrix to sympy.SparseMatrix")
         return sympySM(map( lambda r: list(r), mat.rows()))
+
+def convert_to_sage(mat):
+    """
+    Converts a sympy matrix into a sparse sage matrix over a symbolic ring.
+
+    INPUT::
+
+        - `mat` --  Matrix.
+
+    OUPUT::
+
+        A Sparse sage matrix.
+    """
+
+    if sage.matrix.matrix.is_Matrix(mat):
+        logging.debug("Proved matrix already in sage.")
+        return mat
+    else:
+        logging.debug("Converting matrix to Sage representation.")
+        return matrix(SR, map(lambda r: list(mat.row(r)), range(0, mat.rows)), sparse=True)
+
+
+def support_basis(mat, **kwargs):
+    """
+    Returns a basis for the support of `mat`, i.e. a list of all
+    eigenvectors corresponding to non-zero eigenvalues.
+
+    INPUT::
+
+    - `mat` --  Either a Matrix or a list of them. Required. Sage and Sympy matrices
+                are both fine. (A mixture is also fine.)
+
+    OUTPUT::
+
+        A list of vectors spanning the support(s) of (the matrices in) `mat`.
+    """
+
+    if isinstance(mat, list):
+        evecs = []
+        for m in mat:
+            evecs += eigenspaces(m)
+    else:
+        evecs = eigenspaces(mat)
+
+    return flatten(map(lambda space: space[2], evecs), max_level=1)
+
 
 def eigenspaces(mat, **kwargs):
     """
