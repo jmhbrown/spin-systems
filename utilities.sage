@@ -2,6 +2,7 @@ from sage.symbolic.expression_conversions import algebraic
 
 import logging
 from sympy import SparseMatrix as sympySM
+from sympy import MatrixBase as MatrixBase
 logging.basicConfig(level=logging.DEBUG)
 
 def parse_kwargs(kwargs, option, default):
@@ -60,7 +61,7 @@ def convert_to_sympy(mat):
         A sympy SparseMatrix with the same entries as mat.
     """
 
-    if isinstance(mat, sympy.MatrixBase):
+    if isinstance(mat, MatrixBase):
         logging.debug("Provided matrix already in sympy.")
         return mat
     else:
