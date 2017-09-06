@@ -2,7 +2,8 @@
 load('utilities.sage')
 
 import logging
-logging.basicConfig(level=logging.INFO)
+FORMAT = '%(asctime)s %(levelname)s %(funcName)s : %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 
 def intertwiner(j, j1, j2):
     """

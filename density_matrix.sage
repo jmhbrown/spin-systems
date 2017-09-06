@@ -2,7 +2,8 @@ load('intertwiner.sage')
 load('utilities.sage')
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+FORMAT = '%(asctime)s %(levelname)s %(funcName)s : %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 
 def pre_partial_trace(V1, V2, normalization_constant, k=2):
     """

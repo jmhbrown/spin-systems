@@ -1,9 +1,11 @@
 from sage.symbolic.expression_conversions import algebraic
 
 import logging
+FORMAT = '%(asctime)s %(levelname)s %(funcName)s : %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
+
 from sympy import SparseMatrix as sympySM
 from sympy import MatrixBase as MatrixBase
-logging.basicConfig(level=logging.DEBUG)
 
 def parse_kwargs(kwargs, option, default):
     """
@@ -37,7 +39,6 @@ def partial_trace(mat, n=2):
             row = []
             for j in range(0,mat.ncols()-n+1,n):
                 row.append(mat.subdivision(i/n,j/n).trace())
-                logging.debug("Tracing over the subdivision starting at (%d, %d)." % ( i, j) )
             p_trace.append(row)
 
         logging.info("Done computing partial trace. Converting result to matrix form.")
@@ -140,7 +141,7 @@ def eigenspaces(mat, **kwargs):
     include_zero = parse_kwargs(kwargs, 'include_zero', False)
     symat = convert_to_sympy(mat)
 
-    logging.info("Computing eigenvectors & values.")
+    logging.info("Computing eigenvectors & values of %d by %d matrix." % symat.shape)
 
     if include_zero:
         return symat.eigenvects()
