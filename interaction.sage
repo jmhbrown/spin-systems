@@ -36,56 +36,13 @@ def projection(vectors):
 
     return vec_matrix*tmp*vec_matrix.C.T
 
-def interaction(proj, **kwargs):
-    """
-    Constructs the interaction.
-
-    INPUT::
-
-        - `proj` --     Sympy Matrix. Required. Projection onto the ground state space. Should be a 4^n by 4^n matrix,
-                        with `n` being the number of sites affected by the projection.
-
-        - `length` --   Integer. Optional, default: 4. The number of sites in the spin chain.
-        - `site` --     Integer between 0 and `length`-1. The first site at which the interaction acts.
-        - `output` --   String. Either 'sage' or 'sympy'.
-
-    OUTPUT::
-
-        Matrix which acts non-trivially on `site`, `site`+1, ... , `site`+ `n`
-    """
-
-    length = parse_kwargs(kwargs, 'length', 4)
-    site = parse_kwargs(kwargs, 'site', 0)
-    output = parse_kwargs(kwargs, 'output', 'sympy')
-
-    interaction_length = Integer(Integer(proj.cols).log(4))
-
-    if length - site - interaction_length < 0:
-        raise Exception("Interaction can't start at site %d!" % site)
-    else:
-        logging.debug("Constructing interaction on sites %d to %d (of %d)" % ( site, site+interaction_length, length))
-        if output == 'sage':
-            front_half_mat = Matrix.identity(4**site).tensor_product(convert_to_sage(Matrix.identity(proj.cols) - proj))
-            logging.debug("Front half is a %d by %d matrix" % (front_half_mat.nrows(), front_half_mat.ncols()))
-            return front_half_mat.tensor_product(Matrix.identity(4**(length - site - interaction_length))).sparse_matrix()
-        else:
-            # Construct `identity(4**site) \otimes (1 - proj)` manually.
-            proj_list = [m.eye(proj.cols) - m(proj)]*(4**site)
-            front_half_mat = diag(*proj_list)
-            logging.debug("Front half is a %d by %d matrix" % front_half_mat.shape)
-
-            # Construct `front_half_mat \otimes identity(back_n)` manually.
-            back_n = 4**(length - site - interaction_length)
-            return sympySM(4**length, 4**length, lambda i,j : front_half_mat[floor(i/back_n), floor(j/back_n)] if (i % back_n) == (j % back_n) else 0)
-
-
 def hamiltonian(proj, **kwargs):
     """
     Constructs the hamiltonian.
 
     INPUT::
 
-    - `proj` --     Sympy Matrix. Required. Projection onto the ground state space.
+    - `proj` --     Sage Matrix. Required. Projection onto the ground state space.
     - `length` --   Integer. Optional, default: 4. The number of sites in the spin chain.
 
     OUTPUT::
@@ -93,17 +50,32 @@ def hamiltonian(proj, **kwargs):
         Matrix representation of Hamlitonian.
     """
 
-    interaction_length = Integer(Integer(proj.cols).log(4))
+    d = 4   # 2*spin + 1 - dimension of the state space at each site
+    interaction_length = Integer(Integer(proj.ncols()).log(d))
+    length = parse_kwargs(kwargs, 'length', d)
 
-    length = parse_kwargs(kwargs, 'length', 4)
+    # initialize a nested array.
+    h_array = [ e[:] for e in [[0]*(d**length)]*(d**length) ]
 
-    hamiltonian = m.zeros(4**length)
-
+    logging.info("Computing entries for %d by %d hamiltonian!" % (len(h_array), len(h_array[0])))
     for site in range(0, length-interaction_length+1):
-        hamiltonian += interaction(proj, length=length, site=site)
+        logging.info("Computing contribution from site %d" % site)
+        for i,j in cartesian_product_iterator([range(0,d**length), range(0,d**length)]):
+            # This is identity(d**site) \otimes proj \otimes identity(d**(site+interaction_length))
+            i0 = i % d**site
+            j0 = j % d**site
+            i1 = i % d**(site + interaction_length)
+            j1 = j % d**(site + interaction_length)
+
+            if (i-i1 == j-j1)*(i0 == j0):
+                try:
+                    h_array[i][j] += proj[(i1-i0) % proj.nrows()][(j1-j0) % proj.ncols()]
+                except IndexError:
+                    logging.error("Index error at h_array[%d][%d], proj[%d][%d]" %(i,j, (i1-i0) % proj.nrows(), (j1-j0) % proj.ncols()))
+                    raise
+
+    logging.info("Converting hamiltonian from array to matrix!")
+
+    hamiltonian = sympySM(h_array)
 
     return hamiltonian
-
-
-
-
